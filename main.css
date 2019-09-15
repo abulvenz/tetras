@@ -1,0 +1,24 @@
+@import 'normalize.css';
+
+.empty {
+    background-color: peru;
+
+}
+
+.blocked {
+    background-color: blueviolet
+}
+
+.gamefield {
+    display: grid;
+    grid-template-columns: 30px 30px 30px 30px 30px 30px 30px 30px 30px 30px;
+    grid-gap: 1px;
+    grid-row-gap: 1px;
+    background-color: #fff;
+    color: #444;
+}
+
+.box {
+    border-radius: 5px;
+    height: 30px;
+}
