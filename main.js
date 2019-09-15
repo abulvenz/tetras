@@ -165,12 +165,15 @@ const flatMap = (arr, fn) => arr.reduce((acc, x) => acc.concat(fn(x)), []);
 
 m.mount(document.body, {
     view(vnode) {
-        return [
+        return div.wrapper([
+            
             div.gamefield({ border: '0' },
                 flatMap(field, row => row.map(cell => div.box[cell.type](' ')))
             ),
-            label.score('Level',level), label.score('Score',score)
-        ];
+            div.score.empty(
+            span.score('Level ',level), span.score(' Score ',score)
+            )
+        ]);
     }
 }
 );

@@ -1,8 +1,6 @@
 @import 'normalize.css';
-
 .empty {
     background-color: peru;
-
 }
 
 .blocked {
@@ -10,6 +8,7 @@
 }
 
 .gamefield {
+
     display: grid;
     grid-template-columns: 30px 30px 30px 30px 30px 30px 30px 30px 30px 30px;
     grid-gap: 1px;
@@ -18,7 +17,18 @@
     color: #444;
 }
 
+.wrapper{
+    max-width: 310px;
+    margin: 0 auto;
+}
+
 .box {
     border-radius: 5px;
     height: 30px;
+}
+
+.score {
+    margin-top: 10px;
+    padding: 10px;
+    font-family: Consolas
 }
