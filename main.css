@@ -30,5 +30,7 @@
 .score {
     margin-top: 10px;
     padding: 10px;
-    font-family: Consolas
+    font-family: Consolas;
+    background-color: rgb(75, 39, 3);
+    color:whitesmoke
 }

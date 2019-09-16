@@ -7,7 +7,11 @@ import templates from './template';
 // prettier-ignore
 const { address, aside, footer, header, h1, h2, h3, h4, h5, h6, hgroup, main, nav, section, article, blockquote, dd, dir, div, dl, dt, figcaption, figure, hr, li, ol, p, pre, ul, a, abbr, b, bdi, bdo, br, cite, code, data, dfn, em, i, kdm, mark, q, rb, rp, rt, rtc, ruby, s, samp, small, span, strong, sub, sup, time, tt, u, wbr, area, audio, img, map, track, video, embed, iframe, noembed, object, param, picture, source, canvas, noscript, script, del, ins, caption, col, colgroup, table, tbody, td, tfoot, th, thead, tr, button, datalist, fieldset, form, formfield, input, label, legend, meter, optgroup, option, output, progress, select, textarea, details, dialog, menu, menuitem, summary, content, element, slot, template } = tagl(m);
 
-let heartBeatInterval = 700;
+let initialHeartbeat = 700;
+
+let heartBeatInterval = initialHeartbeat;
+
+let gameOverMessage = 'press a,d to rotate, arrow keys to navigate';
 
 const nCols = 10;
 const nRows = 20;
@@ -79,9 +83,11 @@ const use = (obj, fn) => fn(obj);
 const outOfBounds = part => use(getBounds(part), bounds =>
     [bounds.minCol < 0, bounds.maxCol >= nCols, bounds.maxRow >= nRows].some(e => e));
 
+const hit = part => outOfBounds(part) || partCells(part).some(cell => cell.type !== type.EMPTY);
+
 const moveHorizontally = (part, inc) => {
     part.col += inc;
-    if (outOfBounds(part)) {
+    if (hit(part)) {
         part.col -= inc;
     }
 };
@@ -89,22 +95,20 @@ const moveHorizontally = (part, inc) => {
 const rotate = (part, direction) => {
     const rotations = direction > 0 ? ['rotateLeft', 'rotateRight'] : ['rotateRight', 'rotateLeft'];
     part[rotations[0]]();
-    if (outOfBounds(part)) {
+    if (hit(part)) {
         part[rotations[1]]();
     }
 }
 
-const hit = part => outOfBounds(part) || partCells(part).some(cell => cell.type !== type.EMPTY);
-
 const evaluate = () => {
     const completeLines = field.map((row, idx) => row.every(cell => cell.type === type.BLOCKED) ? idx : undefined).filter(e => !!e);
     completeLines.forEach(idx => field.splice(idx, 1));
-    completeLines.forEach(row => field.unshift(emptyRow(0)))
+    completeLines.forEach(row => (field.length <= nRows) ? field.unshift(emptyRow(0)) : 0);
 
     score += completeLines.length;
 
     while (level < score / 10) {
-        level ++;
+        level++;
         heartBeatInterval /= 2;
     }
 };
@@ -114,18 +118,37 @@ const moveDown = part => {
     if (hit(part)) {
         part.row -= 1;
         fixPart(part);
-
         evaluate();
-
         return createPart();
     }
     return part;
 };
 
+const drawGameOver = () => {
+    gameOverMessage = 'Game Over';
+};
+
+const newGame = () => {
+    score = 0;
+    level = 0;
+    gameOverMessage = '';
+    heartBeatInterval = initialHeartbeat;
+    traverseCells(cell => cell.type = type.EMPTY);
+    currentPart = createPart();
+    heartbeat();
+};
+
 const heartbeat = () => {
     traverseCells(deletePart);
     currentPart = moveDown(currentPart);
-    drawPart(currentPart); window
+
+    if (hit(currentPart)) {
+        drawGameOver();
+        return;
+    }
+
+    drawPart(currentPart);
+
     m.redraw();
     setTimeout(heartbeat, heartBeatInterval);
 };
@@ -153,6 +176,8 @@ document.addEventListener('keydown', e => {
         case 68: // d            
             rotate(currentPart, -1);
             break;
+        case 78: // n
+            newGame();
         default:
             break;
     }
@@ -166,12 +191,12 @@ const flatMap = (arr, fn) => arr.reduce((acc, x) => acc.concat(fn(x)), []);
 m.mount(document.body, {
     view(vnode) {
         return div.wrapper([
-            
             div.gamefield({ border: '0' },
                 flatMap(field, row => row.map(cell => div.box[cell.type](' ')))
             ),
+            div.score.empty(gameOverMessage),
             div.score.empty(
-            span.score('Level ',level), span.score(' Score ',score)
+                span.score('Level ', level), span.score(' Score ', score)
             )
         ]);
     }
