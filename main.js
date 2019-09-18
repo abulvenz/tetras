@@ -1,5 +1,4 @@
-import fn from './fn';
-
+import F from './fn';
 import m from 'mithril';
 import tagl from 'tagl-mithril';
 import templates from './template';
@@ -11,7 +10,9 @@ let initialHeartbeat = 700;
 
 let heartBeatInterval = initialHeartbeat;
 
-let gameOverMessage = 'press a,d to rotate, arrow keys to navigate';
+let gameOverMessage = 'press a,d to rotate, arrow keys to navigate, b boss mode';
+
+let bossmode = false;
 
 const nCols = 10;
 const nRows = 20;
@@ -44,13 +45,13 @@ let createPart = () => {
 
 let currentPart = createPart();
 
-const emptyRow = row => fn.range(0, nCols).map(col => {
+const emptyRow = row => F.range(0, nCols).map(col => {
     return {
         type: type.EMPTY
     };
 });
 
-const field = fn.range(0, nRows)
+const field = F.range(0, nRows)
     .map(row => emptyRow(row));
 
 const traverseCells = fn => field.map(row => row.map(cell => fn(cell)));
@@ -81,7 +82,12 @@ const getBounds = part => {
 const use = (obj, fn) => fn(obj);
 
 const outOfBounds = part => use(getBounds(part), bounds =>
-    [bounds.minCol < 0, bounds.maxCol >= nCols, bounds.maxRow >= nRows].some(e => e));
+    [
+        bounds.minCol < 0,
+        bounds.maxCol >= nCols,
+        bounds.maxRow >= nRows,
+        bounds.minRow < 0]
+        .some(e => e));
 
 const hit = part => outOfBounds(part) || partCells(part).some(cell => cell.type !== type.EMPTY);
 
@@ -102,8 +108,8 @@ const rotate = (part, direction) => {
 
 const evaluate = () => {
     const completeLines = field.map((row, idx) => row.every(cell => cell.type === type.BLOCKED) ? idx : undefined).filter(e => !!e);
-    completeLines.forEach(idx => field.splice(idx, 1));
-    completeLines.forEach(row => (field.length <= nRows) ? field.unshift(emptyRow(0)) : 0);
+    completeLines.reverse().forEach(idx => field.splice(idx, 1));
+    completeLines.forEach(row => (field.length <= nRows) ? field.unshift(emptyRow(0)) : 0);   
 
     score += completeLines.length;
 
@@ -139,6 +145,8 @@ const newGame = () => {
 };
 
 const heartbeat = () => {
+    if (bossmode)
+        return;
     traverseCells(deletePart);
     currentPart = moveDown(currentPart);
 
@@ -169,9 +177,15 @@ document.addEventListener('keydown', e => {
             break;
         case 40: // down
             currentPart = moveDown(currentPart);
+            e.preventDefault();
+            e.stopPropagation();
             break;
         case 65: // a
             rotate(currentPart, 1);
+            break;
+        case 66: // b
+            bossmode = !bossmode;
+            if (!bossmode) heartbeat();
             break;
         case 68: // d            
             rotate(currentPart, -1);
@@ -190,15 +204,19 @@ const flatMap = (arr, fn) => arr.reduce((acc, x) => acc.concat(fn(x)), []);
 
 m.mount(document.body, {
     view(vnode) {
-        return div.wrapper([
+        return !bossmode ? div.wrapper([
             div.gamefield({ border: '0' },
                 flatMap(field, row => row.map(cell => div.box[cell.type](' ')))
             ),
             div.score.empty(gameOverMessage),
             div.score.empty(
                 span.score('Level ', level), span.score(' Score ', score)
+            ),
+        ]) : div.bosscreen(
+            div.wrapper(
+                '/home $ ', span.blink('_')
             )
-        ]);
+        );
     }
 }
 );

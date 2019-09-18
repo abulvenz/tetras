@@ -8,7 +8,6 @@
 }
 
 .gamefield {
-
     display: grid;
     grid-template-columns: 30px 30px 30px 30px 30px 30px 30px 30px 30px 30px;
     grid-gap: 1px;
@@ -18,6 +17,7 @@
 }
 
 .wrapper{
+    padding-top: 30px;
     max-width: 310px;
     margin: 0 auto;
 }
@@ -34,3 +34,21 @@
     background-color: rgb(75, 39, 3);
     color:whitesmoke
 }
+
+.bosscreen {
+    background-color: black;
+    height: 100vh;
+    width: 100vw;
+    padding-top: 20px;
+    color:green;
+}
+
+.blink {
+    animation: blinker 1s linear infinite;
+  }
+  
+  @keyframes blinker {
+    50% {
+      opacity: 0;
+    }
+  }
