@@ -1,10 +1,12 @@
 @import 'normalize.css';
 .empty {
-    background-color: peru;
+    /*    background-color: peru;
+*/
+    background-color: #ddd;
 }
 
 .blocked {
-    background-color: blueviolet
+    background-color: #999;
 }
 
 .gamefield {
@@ -16,7 +18,7 @@
     color: #444;
 }
 
-.wrapper{
+.wrapper {
     padding-top: 30px;
     max-width: 310px;
     margin: 0 auto;
@@ -32,7 +34,7 @@
     padding: 10px;
     font-family: Consolas;
     background-color: rgb(75, 39, 3);
-    color:whitesmoke
+    color: whitesmoke;
 }
 
 .bosscreen {
@@ -40,15 +42,19 @@
     height: 100vh;
     width: 100vw;
     padding-top: 20px;
-    color:green;
+    color: green;
+}
+
+.part {
+    background-color: chartreuse;
 }
 
 .blink {
     animation: blinker 1s linear infinite;
-  }
-  
-  @keyframes blinker {
+}
+
+@keyframes blinker {
     50% {
-      opacity: 0;
+        opacity: 0;
     }
-  }
+}

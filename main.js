@@ -6,16 +6,17 @@ import templates from './template';
 // prettier-ignore
 const { address, aside, footer, header, h1, h2, h3, h4, h5, h6, hgroup, main, nav, section, article, blockquote, dd, dir, div, dl, dt, figcaption, figure, hr, li, ol, p, pre, ul, a, abbr, b, bdi, bdo, br, cite, code, data, dfn, em, i, kdm, mark, q, rb, rp, rt, rtc, ruby, s, samp, small, span, strong, sub, sup, time, tt, u, wbr, area, audio, img, map, track, video, embed, iframe, noembed, object, param, picture, source, canvas, noscript, script, del, ins, caption, col, colgroup, table, tbody, td, tfoot, th, thead, tr, button, datalist, fieldset, form, formfield, input, label, legend, meter, optgroup, option, output, progress, select, textarea, details, dialog, menu, menuitem, summary, content, element, slot, template } = tagl(m);
 
-let initialHeartbeat = 700;
+const config = {
+    initialHeartbeat: 1000,
+    nCols: 10,
+    nRows: 20,
+};
 
-let heartBeatInterval = initialHeartbeat;
+let heartBeatInterval = config.initialHeartbeat;
 
 let gameOverMessage = 'press a,d to rotate, arrow keys to navigate, b boss mode';
 
 let bossmode = false;
-
-const nCols = 10;
-const nRows = 20;
 
 let score = 0;
 let level = 0;
@@ -23,7 +24,7 @@ let level = 0;
 const type = Object.freeze({
     EMPTY: 'empty',
     PART: 'part',
-    BLOCKED: 'blocked'
+    BLOCKED: 'blocked',
 });
 
 const clone = obj => JSON.parse(JSON.stringify(obj));
@@ -32,62 +33,64 @@ let createPart = () => {
     let cells = clone(templates[Math.trunc(Math.random() * templates.length)]);
     return {
         row: 0,
-        col: nCols / 2,
+        col: config.nCols / 2,
         rotateRight: () => {
-            cells = cells.map(cell => { return { row: cell.col, col: -cell.row } });
+            cells = cells.map(cell => {
+                return {row: cell.col, col: -cell.row};
+            });
         },
         rotateLeft: () => {
-            cells = cells.map(cell => { return { row: -cell.col, col: cell.row } });
+            cells = cells.map(cell => {
+                return {row: -cell.col, col: cell.row};
+            });
         },
-        cells: () => cells
-    }
+        cells: () => cells,
+    };
 };
 
 let currentPart = createPart();
 
-const emptyRow = row => F.range(0, nCols).map(col => {
-    return {
-        type: type.EMPTY
-    };
-});
+const emptyRow = row =>
+    F.range(0, config.nCols).map(col => {
+        return {
+            type: type.EMPTY,
+        };
+    });
 
-const field = F.range(0, nRows)
-    .map(row => emptyRow(row));
+const field = F.range(0, config.nRows).map(row => emptyRow(row));
 
 const traverseCells = fn => field.map(row => row.map(cell => fn(cell)));
 
-const deletePart = cell => cell.type = (cell.type === type.PART ? type.EMPTY : cell.type);
+const deletePart = cell => (cell.type = cell.type === type.PART ? type.EMPTY : cell.type);
 
-const partCells = part => part.cells()
-    .map(cell => field[cell.row + part.row][cell.col + part.col]);
+const partCells = part => part.cells().map(cell => field[cell.row + part.row][cell.col + part.col]);
 
-const drawPart = part =>
-    partCells(part).forEach(cell => cell.type = type.PART);
+const drawPart = part => partCells(part).forEach(cell => (cell.type = type.PART));
 
-const fixPart = part =>
-    partCells(part).forEach(cell => cell.type = type.BLOCKED);
+const fixPart = part => partCells(part).forEach(cell => (cell.type = type.BLOCKED));
 
 const getBounds = part => {
-    const bound = (prop, red) => part.cells()
-        .map(cell => cell[prop] + part[prop])
-        .reduce((acc, val) => red(acc, val));
+    const bound = (prop, red) =>
+        part
+            .cells()
+            .map(cell => cell[prop] + part[prop])
+            .reduce((acc, val) => red(acc, val));
     return {
         minCol: bound('col', Math.min),
         minRow: bound('row', Math.min),
         maxCol: bound('col', Math.max),
-        maxRow: bound('row', Math.max)
+        maxRow: bound('row', Math.max),
     };
-}
+};
 
 const use = (obj, fn) => fn(obj);
 
-const outOfBounds = part => use(getBounds(part), bounds =>
-    [
-        bounds.minCol < 0,
-        bounds.maxCol >= nCols,
-        bounds.maxRow >= nRows,
-        bounds.minRow < 0]
-        .some(e => e));
+const outOfBounds = part =>
+    use(getBounds(part), bounds =>
+        [bounds.minCol < 0, bounds.maxCol >= config.nCols, bounds.maxRow >= config.nRows, bounds.minRow < 0].some(
+            e => e
+        )
+    );
 
 const hit = part => outOfBounds(part) || partCells(part).some(cell => cell.type !== type.EMPTY);
 
@@ -104,18 +107,20 @@ const rotate = (part, direction) => {
     if (hit(part)) {
         part[rotations[1]]();
     }
-}
+};
 
 const evaluate = () => {
-    const completeLines = field.map((row, idx) => row.every(cell => cell.type === type.BLOCKED) ? idx : undefined).filter(e => !!e);
+    const completeLines = field
+        .map((row, idx) => (row.every(cell => cell.type === type.BLOCKED) ? idx : undefined))
+        .filter(e => !!e);
     completeLines.reverse().forEach(idx => field.splice(idx, 1));
-    completeLines.forEach(row => (field.length <= nRows) ? field.unshift(emptyRow(0)) : 0);   
+    completeLines.forEach(row => (field.length <= config.nRows ? field.unshift(emptyRow(0)) : 0));
 
     score += completeLines.length;
 
     while (level < score / 10) {
         level++;
-        heartBeatInterval /= 2;
+        heartBeatInterval *= 0.66;
     }
 };
 
@@ -138,15 +143,14 @@ const newGame = () => {
     score = 0;
     level = 0;
     gameOverMessage = '';
-    heartBeatInterval = initialHeartbeat;
-    traverseCells(cell => cell.type = type.EMPTY);
+    heartBeatInterval = config.initialHeartbeat;
+    traverseCells(cell => (cell.type = type.EMPTY));
     currentPart = createPart();
     heartbeat();
 };
 
 const heartbeat = () => {
-    if (bossmode)
-        return;
+    if (bossmode) return;
     traverseCells(deletePart);
     currentPart = moveDown(currentPart);
 
@@ -162,7 +166,6 @@ const heartbeat = () => {
 };
 
 setTimeout(heartbeat, heartBeatInterval);
-
 
 document.addEventListener('keydown', e => {
     traverseCells(deletePart);
@@ -187,7 +190,7 @@ document.addEventListener('keydown', e => {
             bossmode = !bossmode;
             if (!bossmode) heartbeat();
             break;
-        case 68: // d            
+        case 68: // d
             rotate(currentPart, -1);
             break;
         case 78: // n
@@ -204,19 +207,12 @@ const flatMap = (arr, fn) => arr.reduce((acc, x) => acc.concat(fn(x)), []);
 
 m.mount(document.body, {
     view(vnode) {
-        return !bossmode ? div.wrapper([
-            div.gamefield({ border: '0' },
-                flatMap(field, row => row.map(cell => div.box[cell.type](' ')))
-            ),
-            div.score.empty(gameOverMessage),
-            div.score.empty(
-                span.score('Level ', level), span.score(' Score ', score)
-            ),
-        ]) : div.bosscreen(
-            div.wrapper(
-                '/home $ ', span.blink('_')
-            )
-        );
-    }
-}
-);
+        return !bossmode
+            ? div.wrapper([
+                  div.gamefield({border: '0'}, flatMap(field, row => row.map(cell => div.box[cell.type](' ')))),
+                  div.score.empty(gameOverMessage),
+                  div.score.empty(span.score('Level ', level), span.score(' Score ', score)),
+              ])
+            : div.bosscreen(div.wrapper('/home $ ', span.blink('_')));
+    },
+});
