@@ -12,6 +12,8 @@ const config = {
     nRows: 20,
 };
 
+
+
 let heartBeatInterval = config.initialHeartbeat;
 
 let gameOverMessage = 'press a,d to rotate, arrow keys to navigate, b boss mode';
@@ -27,24 +29,29 @@ const type = Object.freeze({
     BLOCKED: 'blocked',
 });
 
+const colorStyle = ({ r, g, b, a }) => `background-color:rgba(${r * 255},${g * 255},${b * 255},${a});`;
+
 const clone = obj => JSON.parse(JSON.stringify(obj));
 
 let createPart = () => {
-    let cells = clone(templates[Math.trunc(Math.random() * templates.length)]);
+    let part = clone(templates[Math.trunc(Math.random() * templates.length)]);
+    let cells = part.parts;
     return {
         row: 0,
         col: config.nCols / 2,
         rotateRight: () => {
             cells = cells.map(cell => {
-                return {row: cell.col, col: -cell.row};
+                return { row: cell.col, col: -cell.row };
             });
         },
         rotateLeft: () => {
             cells = cells.map(cell => {
-                return {row: -cell.col, col: cell.row};
+                return { row: -cell.col, col: cell.row };
             });
         },
         cells: () => cells,
+        color: part.color,
+        form: part.form
     };
 };
 
@@ -54,6 +61,7 @@ const emptyRow = row =>
     F.range(0, config.nCols).map(col => {
         return {
             type: type.EMPTY,
+            color: null
         };
     });
 
@@ -65,9 +73,16 @@ const deletePart = cell => (cell.type = cell.type === type.PART ? type.EMPTY : c
 
 const partCells = part => part.cells().map(cell => field[cell.row + part.row][cell.col + part.col]);
 
-const drawPart = part => partCells(part).forEach(cell => (cell.type = type.PART));
+const drawPart = part => partCells(part).forEach(cell => {
+    cell.type = type.PART;
+    cell.color = part.color;
+});
 
-const fixPart = part => partCells(part).forEach(cell => (cell.type = type.BLOCKED));
+const fixPart = part => partCells(part).forEach(cell => {
+    cell.type = type.BLOCKED;
+    cell.form = part.form;
+    return cell;
+});
 
 const getBounds = part => {
     const bound = (prop, red) =>
@@ -205,14 +220,15 @@ document.addEventListener('keydown', e => {
 
 const flatMap = (arr, fn) => arr.reduce((acc, x) => acc.concat(fn(x)), []);
 
-m.mount(document.body, {
+m.mount(document.querySelector('#field'), {
     view(vnode) {
         return !bossmode
-            ? div.wrapper([
-                  div.gamefield({border: '0'}, flatMap(field, row => row.map(cell => div.box[cell.type](' ')))),
-                  div.score.empty(gameOverMessage),
-                  div.score.empty(span.score('Level ', level), span.score(' Score ', score)),
-              ])
+            ? div({ style: colorStyle({ r: (1000 - heartBeatInterval) / 1000, g: 0, b: 0, a: .25 }) },
+                div.wrapper([
+                    div.gamefield({ border: '0' }, flatMap(field, row => row.map(cell => div.box[cell.type](cell.type === type.PART || cell.type === type.BLOCKED ? { style: colorStyle(cell.color) } : {}, cell.form || ' ')))),
+                    div.score.empty(gameOverMessage),
+                    div.score.empty(span.score('Level ', level), span.score(' Score ', score)),
+                ]))
             : div.bosscreen(div.wrapper('/home $ ', span.blink('_')));
     },
 });
