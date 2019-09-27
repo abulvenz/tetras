@@ -344,13 +344,16 @@ m.mount(document.body, {
                     showControls ? [
                         div.floater(
                             div.left(
-                                button({ onclick: wrapCommand(e => rotate(currentPart, -1)) }, h2(m.trust('&cularr;'))),
-                                button({ onclick: wrapCommand(e => rotate(currentPart, 1)) }, h2(m.trust('&curarr;')))
+                                button.control({ onclick: wrapCommand(e => rotate(currentPart, 1)) }, h2(m.trust('&cularr;'))),
+                                span.hspace(' '),
+                                button.control({ onclick: wrapCommand(e => rotate(currentPart, -1)) }, h2(m.trust('&curarr;')))
                             ),
                             div.right(
-                                button({ onclick: wrapCommand(e => moveHorizontally(currentPart, -1)) }, h2(m.trust('&larr;'))),
-                                button({ onclick: wrapCommand(e => currentPart = moveDown(currentPart)) }, h2(m.trust('&darr;'))),
-                                button({ onclick: wrapCommand(e => moveHorizontally(currentPart, 1)) }, h2(m.trust('&rarr;'))))
+                                button.control({ onclick: wrapCommand(e => moveHorizontally(currentPart, -1)) }, h2(m.trust('&larr;'))),
+                                span.hspace(' '),
+                                button.control({ onclick: wrapCommand(e => currentPart = moveDown(currentPart)) }, h2(m.trust('&darr;'))),
+                                span.hspace(' '),
+                                button.control({ onclick: wrapCommand(e => moveHorizontally(currentPart, 1)) }, h2(m.trust('&rarr;'))))
                         )
                     ] : null,
                     div.score.empty(span.score('Level ', level), span.score(' Score ', score)),

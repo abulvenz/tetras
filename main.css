@@ -247,6 +247,16 @@ button {
     border-radius: 50%
 }
 
+.control {
+    width:60px;
+    height:60px
+}
+
+.hspace {
+    width: 5px;
+    height:50px
+}
+
 .floater {
     height:70px;
 }
