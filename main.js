@@ -2,6 +2,7 @@ import F from './fn';
 import m from 'mithril';
 import tagl from 'tagl-mithril';
 import templates from './template';
+import images from "images/*.png";
 
 // prettier-ignore
 const { address, aside, footer, header, h1, h2, h3, h4, h5, h6, hgroup, main, nav, section, article, blockquote, dd, dir, div, dl, dt, figcaption, figure, hr, li, ol, p, pre, ul, a, abbr, b, bdi, bdo, br, cite, code, data, dfn, em, i, kdm, mark, q, rb, rp, rt, rtc, ruby, s, samp, small, span, strong, sub, sup, time, tt, u, wbr, area, audio, img, map, track, video, embed, iframe, noembed, object, param, picture, source, canvas, noscript, script, del, ins, caption, col, colgroup, table, tbody, td, tfoot, th, thead, tr, button, datalist, fieldset, form, formfield, input, label, legend, meter, optgroup, option, output, progress, select, textarea, details, dialog, menu, menuitem, summary, content, element, slot, template } = tagl(m);
@@ -12,7 +13,7 @@ const config = {
     nRows: 20,
 };
 
-
+let exid = n => `$ex${"00".substring(0, 2 - String(n).length) + String(n)}`;
 
 let heartBeatInterval = config.initialHeartbeat;
 
@@ -21,12 +22,14 @@ let gameOverMessage = 'press a,d to rotate, arrow keys to navigate, b boss mode'
 let bossmode = false;
 
 let score = 0;
+let removedLines = 0;
 let level = 0;
 
 const type = Object.freeze({
     EMPTY: 'empty',
     PART: 'part',
     BLOCKED: 'blocked',
+    BURST: 'burst',
 });
 
 const colorStyle = ({ r, g, b, a }) => `background-color:rgba(${r * 255},${g * 255},${b * 255},${a});`;
@@ -34,7 +37,7 @@ const colorStyle = ({ r, g, b, a }) => `background-color:rgba(${r * 255},${g * 2
 const clone = obj => JSON.parse(JSON.stringify(obj));
 
 let createPart = () => {
-    let part = clone(templates[Math.trunc(Math.random() * templates.length)]);
+    let part = clone(templates[Math.trunc(Math.random() *  templates.length)]);
     let cells = part.parts;
     return {
         row: 0,
@@ -57,17 +60,19 @@ let createPart = () => {
 
 let currentPart = createPart();
 
+const emptyField = () => {
+    return {
+        type: type.EMPTY,
+        color: null
+    };
+};
+
 const emptyRow = row =>
-    F.range(0, config.nCols).map(col => {
-        return {
-            type: type.EMPTY,
-            color: null
-        };
-    });
+    F.range(0, config.nCols).map(emptyField);
 
 const field = F.range(0, config.nRows).map(row => emptyRow(row));
 
-const traverseCells = fn => field.map(row => row.map(cell => fn(cell)));
+const traverseCells = fn => field.map((row, ridx) => row.map((cell, cidx) => fn(cell, ridx, cidx)));
 
 const deletePart = cell => (cell.type = cell.type === type.PART ? type.EMPTY : cell.type);
 
@@ -131,11 +136,104 @@ const evaluate = () => {
     completeLines.reverse().forEach(idx => field.splice(idx, 1));
     completeLines.forEach(row => (field.length <= config.nRows ? field.unshift(emptyRow(0)) : 0));
 
-    score += completeLines.length;
+    removedLines += completeLines.length;
 
-    while (level < score / 10) {
+    score += completeLines.length * completeLines.length;
+
+    while (level < removedLines / 10) {
         level++;
         heartBeatInterval *= 0.66;
+    }
+};
+
+const coordList = () => {
+    let coords = [];
+    const contains = (row, col) => coords.some(e => e.row === row && e.col === col);
+    return {
+        add: (row, col) => {
+            if (contains(row, col))
+                return false;
+            else {
+                coords.push({ row, col });
+                return true;
+            }
+        },
+        coords
+    };
+};
+
+
+let t = coordList();
+t.add(1, 1);
+t.add(1, 1);
+console.log(t.coords)
+
+
+const burstBeat = () => {
+    traverseCells((cell, row, col) => {
+        if (cell.type === type.BURST) {
+            cell.form++;
+            score++;
+            if (cell.form >= 25) {
+                cell.type = type.EMPTY;
+                for (let r = row; r > 0; r--) {
+                    field[r][col] = field[r - 1][col];
+                }
+                field[0][col] = emptyField();
+            }
+            return true;
+        }
+        return false;
+    });
+    m.redraw();
+};
+
+setInterval(burstBeat, 100);
+
+
+const evaluateFancy = () => {
+
+    const inField = ({ row, col }) => {
+        return row >= 0 && row < config.nRows && col >= 0 && col < config.nCols;
+    };
+
+    const neighbors = (row, col) => {
+        return [
+            { row: row - 1, col },
+            { row: row + 1, col },
+            { row, col: col - 1 },
+            { row, col: col + 1 },
+        ].filter(inField);
+    };
+
+    const evaluateField = form => ({ row, col }) => field[row][col].form === form;
+
+    const terminal = ({ row, col }) => col === config.nCols - 1;
+
+    const evaluateRow = idx => {
+        if (field[idx][0].type === type.BLOCKED) {
+
+            const addRec = (coords, row, col, form) => {
+                if (coords.add(row, col))
+                    neighbors(row, col)
+                        .filter(evaluateField(form))
+                        .forEach(neighbor => addRec(coords, neighbor.row, neighbor.col, form));
+            };
+
+            const visitedCoords = coordList();
+            addRec(visitedCoords, idx, 0, field[idx][0].form);
+
+            if (visitedCoords.coords.some(terminal)) {
+                visitedCoords.coords.forEach((cell,idx) => {
+                    field[cell.row][cell.col].type = type.BURST;
+                    field[cell.row][cell.col].form = idx % 25;
+                });
+            }
+        }
+    };
+
+    for (let idx = config.nRows - 1; idx > 0; idx--) {
+        evaluateRow(idx);
     }
 };
 
@@ -155,7 +253,7 @@ const drawGameOver = () => {
 };
 
 const newGame = () => {
-    score = 0;
+    removedLines = 0;
     level = 0;
     gameOverMessage = '';
     heartBeatInterval = config.initialHeartbeat;
@@ -210,7 +308,12 @@ document.addEventListener('keydown', e => {
             break;
         case 78: // n
             newGame();
+            break;
+        case 83:
+            evaluateFancy();
+            break;
         default:
+            console.log(e.keyCode)
             break;
     }
 
@@ -225,7 +328,7 @@ m.mount(document.querySelector('#field'), {
         return !bossmode
             ? div({ style: colorStyle({ r: (1000 - heartBeatInterval) / 1000, g: 0, b: 0, a: .25 }) },
                 div.wrapper([
-                    div.gamefield({ border: '0' }, flatMap(field, row => row.map(cell => div.box[cell.type](cell.type === type.PART || cell.type === type.BLOCKED ? { style: colorStyle(cell.color) } : {}, cell.form || ' ')))),
+                    div.gamefield({ border: '0' }, flatMap(field, row => row.map(cell => div.box[cell.type][cell.type===type.BURST? exid(cell.form) :''](cell.type === type.PART || cell.type === type.BLOCKED ? { style: colorStyle(cell.color) } : {}, ' ')))),
                     div.score.empty(gameOverMessage),
                     div.score.empty(span.score('Level ', level), span.score(' Score ', score)),
                 ]))

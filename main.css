@@ -11,10 +11,10 @@
 
 .gamefield {
     display: grid;
-    grid-template-columns: 30px 30px 30px 30px 30px 30px 30px 30px 30px 30px;
+    grid-template-columns: 32px 32px 32px 32px 32px 32px 32px 32px 32px 32px;
     grid-gap: 1px;
     grid-row-gap: 1px;
-  /*  background-color: #fff;*/
+    /*  background-color: #fff;*/
     color: #444;
 }
 
@@ -26,7 +26,7 @@
 
 .box {
     border-radius: 5px;
-    height: 30px;
+    height: 32px;
 }
 
 .score {
@@ -60,5 +60,185 @@
 }
 
 body {
-    background-color: rgba(125,125,125,.5)
+    background-color: rgba(125, 125, 125, .5)
+}
+
+#ex01 {
+    width: 32px;
+    height: 32px;
+    background: url(images/explosion_5x64x5x64.png) -32px 0;
+    background-size: 160px 160px
+}
+
+#ex02 {
+    width: 32px;
+    height: 32px;
+    background: url(images/explosion_5x64x5x64.png) -64px 0;
+    background-size: 160px 160px
+}
+
+#ex03 {
+    width: 32px;
+    height: 32px;
+    background: url(images/explosion_5x64x5x64.png) -96px 0;
+    background-size: 160px 160px
+}
+
+#ex04 {
+    width: 32px;
+    height: 32px;
+    background: url(images/explosion_5x64x5x64.png) -128px 0;
+    background-size: 160px 160px
+}
+
+/***/
+
+#ex05 {
+    width: 32px;
+    height: 32px;
+    left: 0px;
+    background: url(images/explosion_5x64x5x64.png) 0 -32px;
+    background-size: 160px 160px
+}
+
+#ex06 {
+    width: 32px;
+    height: 32px;
+    background: url(images/explosion_5x64x5x64.png) -32px -32px;
+    background-size: 160px 160px
+}
+
+#ex07 {
+    width: 32px;
+    height: 32px;
+    background: url(images/explosion_5x64x5x64.png) -64px -32px;
+    background-size: 160px 160px
+}
+
+#ex08 {
+    width: 32px;
+    height: 32px;
+    background: url(images/explosion_5x64x5x64.png) -96px -32px;
+    background-size: 160px 160px
+}
+
+#ex09 {
+    width: 32px;
+    height: 32px;
+    background: url(images/explosion_5x64x5x64.png) -128px -32px;
+    background-size: 160px 160px
+}
+
+/***/
+
+#ex10 {
+    width: 32px;
+    height: 32px;
+    left: 0px;
+    background: url(images/explosion_5x64x5x64.png) 0 -64px;
+    background-size: 160px 160px
+}
+
+#ex11 {
+    width: 32px;
+    height: 32px;
+    background: url(images/explosion_5x64x5x64.png) -32px -64px;
+    background-size: 160px 160px
+}
+
+#ex12 {
+    width: 32px;
+    height: 32px;
+    background: url(images/explosion_5x64x5x64.png) -64px -64px;
+    background-size: 160px 160px
+}
+
+#ex13 {
+    width: 32px;
+    height: 32px;
+    background: url(images/explosion_5x64x5x64.png) -96px -64px;
+    background-size: 160px 160px
+}
+
+#ex14 {
+    width: 32px;
+    height: 32px;
+    background: url(images/explosion_5x64x5x64.png) -128px -64px;
+    background-size: 160px 160px
+}
+
+/***/
+
+#ex15 {
+    width: 32px;
+    height: 32px;
+    left: 0px;
+    background: url(images/explosion_5x64x5x64.png) 0 -96px;
+    background-size: 160px 160px
+}
+
+#ex16 {
+    width: 32px;
+    height: 32px;
+    background: url(images/explosion_5x64x5x64.png) -32px -96px;
+    background-size: 160px 160px
+}
+
+#ex17 {
+    width: 32px;
+    height: 32px;
+    background: url(images/explosion_5x64x5x64.png) -64px -96px;
+    background-size: 160px 160px
+}
+
+#ex18 {
+    width: 32px;
+    height: 32px;
+    background: url(images/explosion_5x64x5x64.png) -96px -96px;
+    background-size: 160px 160px
+}
+
+#ex19 {
+    width: 32px;
+    height: 32px;
+    background: url(images/explosion_5x64x5x64.png) -128px -96px;
+    background-size: 160px 160px
+}
+
+/***/
+
+#ex20 {
+    width: 32px;
+    height: 32px;
+    left: 0px;
+    background: url(images/explosion_5x64x5x64.png) 0 -128px;
+    background-size: 160px 160px
+}
+
+#ex21 {
+    width: 32px;
+    height: 32px;
+    background: url(images/explosion_5x64x5x64.png) -32px -128px;
+    background-size: 160px 160px
+}
+
+#ex22 {
+    width: 32px;
+    height: 32px;
+    background: url(images/explosion_5x64x5x64.png) -64px -128px;
+    background-size: 160px 160px
+}
+
+#ex23 {
+    width: 32px;
+    height: 32px;
+    background: url(images/explosion_5x64x5x64.png) -96px -128px;
+    background-size: 160px 160px
+}
+
+#ex24 {
+    width: 32px;
+    height: 32px;
+    background: url(images/explosion_5x64x5x64.png) -128px -128px;
+    background-size: 160px 160px
 }
