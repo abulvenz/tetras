@@ -327,6 +327,13 @@ const flatMap = (arr, fn) => arr.reduce((acc, x) => acc.concat(fn(x)), []);
 let supportsTouch = ("ontouchstart" in window) || window.navigator.msMaxTouchPoints > 0;
 let showControls = supportsTouch;
 
+
+const wrapCommand = cmd => e => {
+    traverseCells(deletePart);
+    cmd(e);
+    drawPart(currentPart);
+};
+
 m.mount(document.body, {
     view(vnode) {
         return !bossmode
@@ -336,8 +343,14 @@ m.mount(document.body, {
                     div.score.empty(gameOverMessage, button({ onclick: e => showControls = !showControls }, 'mobile controls')),
                     showControls ? [
                         div.floater(
-                            div.left(button({}, m.trust('&cularr;')), button({}, m.trust('&curarr;'))),
-                            div.right(button({}, m.trust('&larr;')), button({}, m.trust('&darr;')), button({}, m.trust('&rarr;')))
+                            div.left(
+                                button({ onclick: wrapCommand(e => rotate(currentPart, -1)) }, m.trust('&cularr;')),
+                                button({ onclick: wrapCommand(e => rotate(currentPart, 1)) }, m.trust('&curarr;'))
+                            ),
+                            div.right(
+                                button({ onclick: wrapCommand(e => moveHorizontally(currentPart, -1)) }, m.trust('&larr;')),
+                                button({ onclick: wrapCommand(e => currentPart = moveDown(currentPart)) }, m.trust('&darr;')),
+                                button({ onclick: wrapCommand(e => moveHorizontally(currentPart, 1)) }, m.trust('&rarr;')))
                         )
                     ] : null,
                     div.score.empty(span.score('Level ', level), span.score(' Score ', score)),
