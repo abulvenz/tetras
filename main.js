@@ -17,7 +17,7 @@ let exid = n => `$ex${"00".substring(0, 2 - String(n).length) + String(n)}`;
 
 let heartBeatInterval = config.initialHeartbeat;
 
-let gameOverMessage = 'press a,d to rotate, arrow keys to navigate, b boss mode';
+let gameOverMessage = 'press a,d to rotate, arrow keys to navigate, b boss mode, s for special';
 
 let bossmode = false;
 
@@ -243,6 +243,7 @@ const moveDown = part => {
         part.row -= 1;
         fixPart(part);
         evaluate();
+        evaluateFancy();
         return createPart();
     }
     return part;
