@@ -17,7 +17,7 @@ let exid = n => `$ex${"00".substring(0, 2 - String(n).length) + String(n)}`;
 
 let heartBeatInterval = config.initialHeartbeat;
 
-let gameOverMessage = 'press a,d to rotate, arrow keys to navigate, b boss mode, s for special';
+let gameOverMessage = 'press a,d to rotate, arrow keys to navigate, b boss mode';
 
 let bossmode = false;
 
@@ -324,10 +324,10 @@ document.addEventListener('keydown', e => {
 
 const flatMap = (arr, fn) => arr.reduce((acc, x) => acc.concat(fn(x)), []);
 
-m.mount(document.querySelector('#field'), {
+m.mount(document.body, {
     view(vnode) {
         return !bossmode
-            ? div({ style: colorStyle({ r: (1000 - heartBeatInterval) / 1000, g: 0, b: 0, a: .25 }) },
+            ? div(/*{ style: colorStyle({ r: (1000 - heartBeatInterval) / 1000, g: 0, b: 0, a: .25 }) },*/
                 div.wrapper([
                     div.gamefield({ border: '0' }, flatMap(field, row => row.map(cell => div.box[cell.type][cell.type===type.BURST? exid(cell.form) :''](cell.type === type.PART || cell.type === type.BLOCKED ? { style: colorStyle(cell.color) } : {}, ' ')))),
                     div.score.empty(gameOverMessage),
