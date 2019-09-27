@@ -37,7 +37,7 @@ const colorStyle = ({ r, g, b, a }) => `background-color:rgba(${r * 255},${g * 2
 const clone = obj => JSON.parse(JSON.stringify(obj));
 
 let createPart = () => {
-    let part = clone(templates[Math.trunc(Math.random() *  templates.length)]);
+    let part = clone(templates[Math.trunc(Math.random() * templates.length)]);
     let cells = part.parts;
     return {
         row: 0,
@@ -224,7 +224,7 @@ const evaluateFancy = () => {
             addRec(visitedCoords, idx, 0, field[idx][0].form);
 
             if (visitedCoords.coords.some(terminal)) {
-                visitedCoords.coords.forEach((cell,idx) => {
+                visitedCoords.coords.forEach((cell, idx) => {
                     field[cell.row][cell.col].type = type.BURST;
                     field[cell.row][cell.col].form = idx % 25;
                 });
@@ -324,13 +324,22 @@ document.addEventListener('keydown', e => {
 
 const flatMap = (arr, fn) => arr.reduce((acc, x) => acc.concat(fn(x)), []);
 
+let supportsTouch = ("ontouchstart" in window) || window.navigator.msMaxTouchPoints > 0;
+let showControls = supportsTouch;
+
 m.mount(document.body, {
     view(vnode) {
         return !bossmode
             ? div(/*{ style: colorStyle({ r: (1000 - heartBeatInterval) / 1000, g: 0, b: 0, a: .25 }) },*/
                 div.wrapper([
-                    div.gamefield({ border: '0' }, flatMap(field, row => row.map(cell => div.box[cell.type][cell.type===type.BURST? exid(cell.form) :''](cell.type === type.PART || cell.type === type.BLOCKED ? { style: colorStyle(cell.color) } : {}, ' ')))),
-                    div.score.empty(gameOverMessage),
+                    div.gamefield({ border: '0' }, flatMap(field, row => row.map(cell => div.box[cell.type][cell.type === type.BURST ? exid(cell.form) : ''](cell.type === type.PART || cell.type === type.BLOCKED ? { style: colorStyle(cell.color) } : {}, ' ')))),
+                    div.score.empty(gameOverMessage, button({ onclick: e => showControls = !showControls }, 'mobile controls')),
+                    showControls ? [
+                        div.floater(
+                            div.left(button({}, m.trust('&cularr;')), button({}, m.trust('&curarr;'))),
+                            div.right(button({}, m.trust('&larr;')), button({}, m.trust('&darr;')), button({}, m.trust('&rarr;')))
+                        )
+                    ] : null,
                     div.score.empty(span.score('Level ', level), span.score(' Score ', score)),
                 ]))
             : div.bosscreen(div.wrapper('/home $ ', span.blink('_')));

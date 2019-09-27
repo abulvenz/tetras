@@ -242,3 +242,19 @@ body {
     background: url(images/explosion_5x64x5x64.png) -128px -128px;
     background-size: 160px 160px
 }
+
+button {
+    border-radius: 50%
+}
+
+.floater {
+    height:20px;
+}
+
+.right {
+    float: right
+}
+
+.left {
+    float: left
+}
